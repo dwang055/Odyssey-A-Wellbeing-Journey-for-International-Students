@@ -1,4 +1,4 @@
-# Odyssey 1.5
+# Odyssey 1.6
 
 A short, bilingual (English / 中文) wellbeing journey for international students: three chapters of about ten minutes each, a lighthouse hub, and a guide for staff.
 

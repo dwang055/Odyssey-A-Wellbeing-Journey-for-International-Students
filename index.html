@@ -99,6 +99,16 @@ h2{font-size:22px}h3{font-size:19px}
 .skillmini .l2{color:rgba(255,255,255,.82)}
 .skillmini b{display:block;font-family:var(--display);color:#ffd27d;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
 .p-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.orig{display:flex;flex-direction:column;gap:6px}
+.orig h3{font-size:15px;color:var(--dim);font-family:var(--body);font-weight:700}
+.origrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.origlink{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink);font-size:13px;background:var(--bg);border-radius:10px;padding:6px}
+.origlink img{width:100%;aspect-ratio:1.4142;object-fit:cover;border-radius:6px;display:block;background:#dde5f2}
+.origlink:hover{outline:2px solid var(--line)}
+.origin{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:center}
+.origin img{width:100%;aspect-ratio:1.4142;object-fit:cover;border-radius:10px;display:block;box-shadow:0 6px 18px rgba(23,34,58,.18)}
+.origin .txt{display:flex;flex-direction:column;gap:8px;min-width:0}
+@media (max-width:560px){.origin{grid-template-columns:1fr}}
 .p-nav{display:flex;justify-content:space-between;gap:8px}
 .p-nav button{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;color:var(--ink);min-height:36px}
 .p-nav button[disabled]{opacity:.35;cursor:default}
@@ -151,6 +161,20 @@ footer{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--dim
 .guide .say .gl{display:block;color:var(--dim);font-size:14px;font-family:var(--zh)}
 .guide .src{font-size:12px;color:var(--dim)}
 .guide .src a{color:var(--accent)}
+.map-more,.p-top{display:none}
+@media (max-width:700px){
+  .hero{padding-block:6px 0;gap:6px}
+  .peak{display:none}
+  .word{font-size:clamp(28px,9vw,40px)}
+  .tagline{font-size:11px}
+  .sub{font-size:15px;line-height:1.45}
+  .hero .chiprow{display:none}
+  .isle{aspect-ratio:5/4}
+  .map-more{display:block;position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font:inherit;font-weight:700;font-size:15px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 18px;min-height:44px;white-space:nowrap;box-shadow:0 4px 14px rgba(23,34,58,.3);cursor:pointer}
+  .map-more[hidden]{display:none}
+  .p-top{display:inline-flex;align-items:center;min-height:44px;font:inherit;font-size:15px;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:0 16px;cursor:pointer;align-self:flex-start}
+  .isle-hint{display:none}
+}
 </style>
 
 <link rel="manifest" href="manifest.webmanifest">
@@ -183,10 +207,13 @@ footer{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--dim
       <div class="isle" id="isle" hidden><canvas aria-hidden="true"></canvas><div class="isle-ui"></div><p class="isle-hint" data-t="isleHint"></p></div>
       <div class="map" id="map"></div>
       <button class="map-out" id="mapOut" type="button" hidden></button>
+      <button class="map-more" id="mapMore" type="button" hidden></button>
     </div>
     <nav class="steps" id="steps" aria-label="Stages of the journey"></nav>
     <article class="panel" id="panel" aria-live="polite"></article>
   </section>
+
+  <section class="origin" id="origin" aria-labelledby="originTitle"></section>
 
   <section class="guide" id="guide" aria-labelledby="guideTitle"></section>
 
@@ -204,6 +231,7 @@ footer{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--dim
 <script src="odyssey-fx.js"></script>
 <script>
 (()=>{
+const HAS_CONCEPT=false;
 const FX=window.OdysseyFX||{sfx(){},init(){},refresh(){},RM:false};
 const T={
  help:{en:"Need to talk?",zh:"想找人聊聊？"},
@@ -217,6 +245,12 @@ const T={
  mapOut:{en:"⤢ Whole island",zh:"⤢ 查看全岛"},prev:{en:"‹ Previous",zh:"‹ 上一站"},next:{en:"Next ›",zh:"下一站 ›"},
  time:{en:"About 10 minutes",zh:"约10分钟"},youLeave:{en:"You leave with",zh:"你会带走"},
  goNext:{en:"Start a chapter",zh:"开始一章"},
+ readMore:{en:"Read about the ",zh:"了解"},backMap:{en:"↑ Back to the map",zh:"↑ 回到地图"},
+ origTitle:{en:"Where Odyssey comes from",zh:"Odyssey 的由来"},
+ origBody:{en:"This app is a browser version of ODYSSEY, a VR game concept by Matthew Lei for his University of Auckland design capstone (2023). His 60-page visual summary shows the research, the script for each chapter, the puzzles, the world map, the lighthouse and the finished 3D world.",zh:"这个应用是 ODYSSEY 的网页版。ODYSSEY 是 Matthew Lei 为奥克兰大学设计专业毕业设计（2023）创作的 VR 游戏构想。他的60页视觉总结展示了研究过程、每一章的脚本、谜题、世界地图、灯塔，以及完成的3D世界。"},
+ origRead:{en:"Read the original concept",zh:"阅读最初的构想"},origWorld:{en:"See the 3D world",zh:"查看3D世界"},
+ origFrom:{en:"From the original concept",zh:"来自最初的构想"},
+ concept:{en:"The original concept",zh:"最初的构想"},
  jn:[{en:"Your traveller has just arrived: a dim lantern, and a small grey cloud overhead.",zh:"你的旅人刚刚到达：灯笼昏暗，头顶还有一小片灰云。"},
      {en:"One orb found. The lantern is brighter and the cloud is lifting.",zh:"找到一颗光球。灯笼更亮了，灰云正在散去。"},
      {en:"Two orbs found. The cloud has almost gone.",zh:"找到两颗光球。灰云几乎散尽了。"},
@@ -254,7 +288,7 @@ const T={
 const SN={en:"Stage",zh:"第"};
 const TABS=[{id:"about",t:{en:"The place",zh:"这个地方"}},{id:"ideas",t:{en:"Key ideas",zh:"核心概念"}},{id:"why",t:{en:"Why it helps",zh:"为什么有帮助"}}];
 const STAGES=[
- {c:"#4f7fae",short:{en:"Shore",zh:"海岸"},place:{en:"The Shore",zh:"海岸"},q:{en:"Arriving",zh:"抵达"},
+ {orig:[{p:31,t:{en:"Game structure",zh:"游戏结构"}},{p:40,t:{en:"World map sketch",zh:"世界地图草图"}},{p:21,t:{en:"Research: settling in",zh:"研究：适应新环境"}}],c:"#4f7fae",short:{en:"Shore",zh:"海岸"},place:{en:"The Shore",zh:"海岸"},q:{en:"Arriving",zh:"抵达"},
   summary:{en:"Every journey starts on an unfamiliar shore: a new language, new food, new ways of studying. Your traveller arrives here with a dim lantern and a small grey cloud overhead.",zh:"每段旅程都从一片陌生的海岸开始：新的语言、新的食物、新的学习方式。你的旅人带着一盏昏暗的灯笼来到这里，头顶还有一小片灰云。"},
   doTitle:{en:"How the journey works",zh:"旅程怎么进行"},
   do:[{en:"Tap any place on the island, or a stage below, to read about it.",zh:"点击小岛上的任何地方，或下方的阶段，就能查看介绍。"},
@@ -266,7 +300,7 @@ const STAGES=[
   why:[{en:"Knowing that settling in has ups and downs makes a hard week easier to understand.",zh:"知道适应过程本来就有起有落，会让难熬的一周更容易理解。"},
        {en:"Research with Chinese students abroad names five common pressures: language, isolation, discrimination, study pressure and guilt toward family. The three chapters touch each of them.",zh:"针对海外中国学生的研究指出了五种常见压力：语言、孤立、歧视、学业压力和对家人的愧疚。这三章分别涉及了它们。"}],
   island:{en:"On the island: the traveller starts here, under a grey cloud.",zh:"在小岛上：旅人从这里出发，头顶有一片灰云。"}},
- {c:"#2b7a50",ch:1,short:{en:"Bridge",zh:"力量之桥"},place:{en:"Bridge of Strengths",zh:"力量之桥"},q:{en:"Where am I?",zh:"我在哪里？"},
+ {c:"#2b7a50",ch:1,orig:[{p:34,t:{en:"Original script",zh:"原始脚本"}},{p:51,t:{en:"The 3D bridge",zh:"3D 桥"}},{p:21,t:{en:"Te Whare Tapa Whā",zh:"Te Whare Tapa Whā"}}],short:{en:"Bridge",zh:"力量之桥"},place:{en:"Bridge of Strengths",zh:"力量之桥"},q:{en:"Where am I?",zh:"我在哪里？"},
   summary:{en:"A river gorge separates home from here. You build a bridge across it, one plank at a time, out of strengths you already have.",zh:"一道峡谷把家乡和这里隔开。你用自己本来就有的力量，一块木板一块木板地搭起一座桥。"},
   doTitle:{en:"What you'll do",zh:"你会做什么"},
   do:[{en:"Choose two strengths for each wall of the house: spirit, mind, body, and family and friends.",zh:"为房子的每面墙各选两个力量：精神、心智、身体、家人与朋友。"},
@@ -280,7 +314,7 @@ const STAGES=[
        {en:"A plan with a set time is far more likely to happen than a general intention.",zh:"定好时间的计划，比笼统的打算更容易实现。"}],
   skill:{t:{en:"Carry your strengths",zh:"带上你的力量"},d:{en:"When things feel shaky, use one strength from home and one new root from here.",zh:"感到动摇时，用一个家乡带来的力量，再加一个在这里长出的新根。"}},
   island:{en:"On the island: finishing this chapter brings colour back to the forest, and flowers grow.",zh:"在小岛上：完成这一章，森林会恢复色彩，开出花朵。"}},
- {c:"#4b5677",ch:2,short:{en:"Cave",zh:"映照之洞"},place:{en:"Cave of Reflections",zh:"映照之洞"},q:{en:"Who am I?",zh:"我是谁？"},
+ {c:"#4b5677",ch:2,orig:[{p:35,t:{en:"Original script",zh:"原始脚本"}},{p:55,t:{en:"The 3D cave",zh:"3D 洞穴"}},{p:23,t:{en:"Research: the self",zh:"研究：自我"}}],short:{en:"Cave",zh:"映照之洞"},place:{en:"Cave of Reflections",zh:"映照之洞"},q:{en:"Who am I?",zh:"我是谁？"},
   summary:{en:"Inside a dark cave, harsh thoughts block the way like walls. You can't force them open. You open them by finding a kinder, more balanced way to say them.",zh:"在昏暗的洞穴里，苛刻的念头像墙一样挡住去路。你无法硬闯，只能找到一种更温和、更平衡的说法，让它们打开。"},
   doTitle:{en:"What you'll do",zh:"你会做什么"},
   do:[{en:"Find your way through a maze by the light of your lantern.",zh:"借着灯笼的光，在迷宫中找路。"},
@@ -295,7 +329,7 @@ const STAGES=[
        {en:"Treating yourself the way you would treat a friend is linked with less stress from settling into a new country.",zh:"像对待朋友那样对待自己，与更小的适应压力相关。"}],
   skill:{t:{en:"Answer the thought",zh:"回应念头"},d:{en:"Notice the thought. Ask: is it fair, or just harsh? Say the balanced version, the way you would to a friend.",zh:"留意这个念头。问自己：它公平吗，还是只是苛刻？像对朋友那样，说出平衡的版本。"}},
   island:{en:"On the island: finishing this chapter lights up crystals in the cave.",zh:"在小岛上：完成这一章，洞里的水晶会亮起来。"}},
- {c:"#a8667c",ch:3,short:{en:"Valley",zh:"光之谷"},place:{en:"Valley of Light",zh:"光之谷"},q:{en:"Who are they?",zh:"他们是谁？"},
+ {c:"#a8667c",ch:3,orig:[{p:36,t:{en:"Original script and puzzles",zh:"原始脚本与谜题"}},{p:56,t:{en:"The 3D valley",zh:"3D 山谷"}},{p:24,t:{en:"Research: social identity",zh:"研究：社会身份"}}],short:{en:"Valley",zh:"光之谷"},place:{en:"Valley of Light",zh:"光之谷"},q:{en:"Who are they?",zh:"他们是谁？"},
   summary:{en:"In a snowy valley, your light stays bright only when it reaches someone. Mirrors and frosted thoughts stand between you and other people.",zh:"在雪谷里，只有照到别人，你的光才会一直明亮。镜子和结霜的念头挡在你和他人之间。"},
   doTitle:{en:"What you'll do",zh:"你会做什么"},
   do:[{en:"Turn mirrors to guide your beam to a classmate, a club, the students' association and family.",zh:"转动镜子，把光引向一位同学、一个社团、学生会和家人。"},
@@ -310,7 +344,7 @@ const STAGES=[
        {en:"Students in New Zealand research preferred turning to friends and family before services, so this chapter starts there. The help guide covers the rest.",zh:"新西兰的研究发现，学生更愿意先向朋友和家人求助，再找专业服务，所以这一章从这里开始。其余的内容在求助指南里。"}],
   skill:{t:{en:"Send a little light",zh:"送出一点光"},d:{en:"When you want to pull away, send one small signal instead.",zh:"想退缩的时候，换成发出一个小信号。"}},
   island:{en:"On the island: finishing this chapter brings flowers up through the snow.",zh:"在小岛上：完成这一章，花儿会从雪里探出头来。"}},
- {c:"#c98a24",short:{en:"Lighthouse",zh:"灯塔"},place:{en:"The Lighthouse",zh:"灯塔"},q:{en:"A new beginning",zh:"新的开始"},
+ {orig:[{p:41,t:{en:"Lighthouse sketch",zh:"灯塔草图"}},{p:49,t:{en:"Final results",zh:"最终成果"}},{p:50,t:{en:"The finished world",zh:"完成的世界"}}],c:"#c98a24",short:{en:"Lighthouse",zh:"灯塔"},place:{en:"The Lighthouse",zh:"灯塔"},q:{en:"A new beginning",zh:"新的开始"},
   summary:{en:"The lighthouse on the peak went dark long ago. Bring the three orbs of knowledge here to light it again.",zh:"山顶上的灯塔早已熄灭。把三颗知识之球带到这里，让它重新亮起。"},
   doTitle:{en:"What happens here",zh:"在这里会发生什么"},
   do:[{en:"Collect the orb from each chapter.",zh:"从每一章收集一颗光球。"},
@@ -420,7 +454,16 @@ function select(i,opts){
   FX.sfx("tap");render();
   if(opts&&opts.focusPanel)document.getElementById("panel").scrollIntoView({behavior:FX.RM?"auto":"smooth",block:"nearest"});
 }
-function renderOut(){const b=document.getElementById("mapOut");b.hidden=!zoomed||!island;b.textContent=P(T.mapOut);b.onclick=()=>{zoomed=false;island&&island.select(null);renderOut()}}
+function renderOrigin(){
+  if(!HAS_CONCEPT){document.getElementById("origin").hidden=true;return}
+  document.getElementById("origin").innerHTML=`<a href="concept.html" aria-hidden="true" tabindex="-1"><img src="concept/t01.webp" alt="" width="320" height="226"></a>
+    <div class="txt"><h2 id="originTitle">${L(T.origTitle)}</h2><p>${L(T.origBody)}</p>
+    <div class="p-actions"><a class="btn" href="concept.html">${L(T.origRead)}</a><a class="btn ghost" href="concept.html#p50">${L(T.origWorld)}</a></div></div>`;
+}
+function renderOut(){const b=document.getElementById("mapOut");b.hidden=!zoomed||!island;b.textContent=P(T.mapOut);b.onclick=()=>{zoomed=false;island&&island.select(null);renderOut()}
+  const m=document.getElementById("mapMore"),st=STAGES[sel];m.hidden=!zoomed;
+  m.textContent=lang==="zh"?T.readMore.zh+st.short.zh+" ↓":T.readMore.en+st.short.en+" ↓";
+  m.onclick=()=>{const pn=document.getElementById("panel");pn.scrollIntoView({behavior:FX.RM?"auto":"smooth",block:"start"});setTimeout(()=>{const h=pn.querySelector("h2,h3");if(h){h.tabIndex=-1;h.focus({preventScroll:true})}},400)}}
 function renderSteps(p){
   const here=defaultStage(p);
   document.getElementById("steps").innerHTML=STAGES.map((st,i)=>{
@@ -437,6 +480,7 @@ function renderPanel(p){
   let pane="";
   if(tab==="about")pane=`<p>${L(st.summary)}</p><h3>${L(st.doTitle)}</h3><ul>${st.do.map(x=>`<li>${L(x)}</li>`).join("")}</ul>
     ${st.skill?`<div class="skillmini"><b>${L(T.youLeave)}</b>${L(st.skill.t)} · ${L(st.skill.d)}</div>`:""}
+    ${HAS_CONCEPT&&st.orig?`<div class="orig"><h3>${L(T.origFrom)}</h3><div class="origrow">${st.orig.map(o=>`<a class="origlink" href="concept.html#p${o.p}"><img src="concept/t${String(o.p).padStart(2,"0")}.webp" alt="" loading="lazy" width="320" height="226"><span>${esc(P(o.t))} · p${o.p}</span></a>`).join("")}</div></div>`:""}
     ${sel===0?`<p class="isle-note">${L(T.jn[lit?4:Math.min(3,(p.heal||[]).filter(n=>p["c"+n]).length)])}</p>`:`<p class="isle-note">${L(st.island)}</p>`}`;
   if(tab==="ideas")pane=st.ideas.map(x=>`<div class="idea"><b>${L(x.t)}</b><span>${L(x.d)}</span></div>`).join("");
   if(tab==="why")pane=st.why.map(x=>`<p>${L(x)}</p>`).join("");
@@ -451,7 +495,9 @@ function renderPanel(p){
     <div class="tabs" role="tablist">${TABS.map(t=>`<button class="tab" role="tab" type="button" id="tab-${t.id}" aria-controls="pane" aria-selected="${tab===t.id}" data-tab="${t.id}">${esc(P(t.t))}</button>`).join("")}</div>
     <div class="tabpane" id="pane" role="tabpanel" aria-labelledby="tab-${tab}">${pane}</div>
     <div class="p-actions">${act}</div>
-    <div class="p-nav"><button type="button" id="pPrev" ${sel===0?"disabled":""}>${esc(P(T.prev))}</button><button type="button" id="pNext" ${sel===4?"disabled":""}>${esc(P(T.next))}</button></div>`;
+    <div class="p-nav"><button type="button" id="pPrev" ${sel===0?"disabled":""}>${esc(P(T.prev))}</button><button type="button" id="pNext" ${sel===4?"disabled":""}>${esc(P(T.next))}</button></div>
+    <button type="button" class="p-top" id="pTop">${esc(P(T.backMap))}</button>`;
+  document.getElementById("pTop").onclick=()=>document.querySelector(".stage3").scrollIntoView({behavior:FX.RM?"auto":"smooth",block:"start"});
   el.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderPanel(prog());document.getElementById("tab-"+tab).focus()});
   el.querySelector(".tabs").onkeydown=e=>{const ix=TABS.findIndex(t=>t.id===tab);if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();tab=TABS[(ix+(e.key==="ArrowRight"?1:TABS.length-1))%TABS.length].id;renderPanel(prog());document.getElementById("tab-"+tab).focus()}};
   document.getElementById("pPrev").onclick=()=>select(sel-1,{keepZoom:true});document.getElementById("pNext").onclick=()=>select(sel+1,{keepZoom:true});
@@ -521,7 +567,7 @@ function render(){
   document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
   document.documentElement.lang=lang==="zh"?"zh-Hans":"en";
   const il=document.getElementById("instLine");if(campusOn()&&CAMPUS.institution){il.hidden=false;il.innerHTML=L({en:"Set up for "+CAMPUS.institution,zh:"适用于 "+CAMPUS.institution})}else il.hidden=true;
-  renderMap(p);renderSteps(p);renderPanel(p);renderOut();renderGuide();renderReset();if(redrawSheet)redrawSheet();
+  renderMap(p);renderSteps(p);renderPanel(p);renderOut();renderOrigin();renderGuide();renderReset();if(redrawSheet)redrawSheet();
   if(island&&!blooming&&!lighting)island.update({healed:healedOf(p),travHeal:travHealOf(p),rest:restOf(p),done:CH.map(c=>!!p["c"+c.n]),lit:!!(litNow||p.lit),
     labels:STAGES.map(st=>P(st.place)),aria:STAGES.map((st,i)=>P({en:"Stage "+(i+1)+": "+st.place.en,zh:"第"+(i+1)+"站："+st.place.zh}))});
 }
